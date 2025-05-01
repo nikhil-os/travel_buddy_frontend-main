@@ -7,7 +7,7 @@ function QRCodeSection() {
   const router = useRouter();
 
   const handleDownloadClick = () => {
-    router.push('/travelconfirmation');
+    router.push('/qrforapps');
   };
 
   return (

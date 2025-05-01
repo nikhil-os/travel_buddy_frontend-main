@@ -1,22 +1,37 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import TravelBuddyHeader from '@/components/ui/TravelBuddyHeader';
 import DestinationSearch from '@/components/ui/DestinationSearch';
 import PopularDestinations from '@/components/ui/PopularDestinations';
 import AppsForJapan from '@/components/ui/AppsForJapan';
 
+// Import API helper
+import api from '@/app/utils/api';
+
 export default function Home() {
   const [showAppsForJapan, setShowAppsForJapan] = useState(false);
+  const [destinations, setDestinations] = useState([]);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
+
+  useEffect(() => {
+    // Fetch popular destinations from backend
+    api.get('/destinations/popular')
+      .then((res) => {
+        setDestinations(res.data);
+      })
+      .catch((err) => console.error('Failed to load destinations:', err))
+      .finally(() => setLoading(false));
+  }, []);
 
   const handleContinue = (selectedDestination) => {
     const country = selectedDestination.trim().toLowerCase();
     if (country === 'japan') {
       setShowAppsForJapan(true);
     } else {
-      router.push(`/travelbuddy/${encodeURIComponent(country)}`);
+      router.push(`/qrforapps?destination=${encodeURIComponent(country)}`);
     }
   };
 
@@ -40,7 +55,14 @@ export default function Home() {
             </p>
 
             <DestinationSearch onContinue={handleContinue} />
-            <PopularDestinations />
+
+            {/* Pass fetched data into PopularDestinations */}
+            {!loading && (
+              <PopularDestinations
+                destinations={destinations}
+                onSelect={handleContinue}
+              />
+            )}
           </>
         )}
       </main>
