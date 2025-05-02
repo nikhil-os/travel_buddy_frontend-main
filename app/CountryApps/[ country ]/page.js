@@ -8,16 +8,22 @@ import AppsForJapan from '@/components/ui/AppsForJapan';
 import QRCodeSection from '@/components/ui/QRCodeSection';
 import TravelSelections from '@/components/ui/TravelSelections';
 import AppDownload from '@/components/ui/AppDownload';
+import api from '@/app/utils/api';
 
 export default function CountryPage({ params }) {
   const { country } = params;
   const [step, setStep] = useState(1); // skip search, start at app selection
   const [selectedApps, setSelectedApps] = useState([]);
+  const [countryApps, setCountryApps] = useState([]);
   const router = useRouter();
 
   // If you want to reset when country changes
   useEffect(() => {
     setStep(1);
+    // Fetch apps for the selected country from API
+    api.get(`/apps?country=${encodeURIComponent(country)}`)
+      .then((res) => setCountryApps(res.data))
+      .catch((err) => console.error('Failed to fetch apps:', err));
   }, [country]);
 
   const handleGenerateQRCode = () => {
@@ -37,6 +43,7 @@ export default function CountryPage({ params }) {
         {step === 1 && (
           <AppsForJapan
             country={country}
+            apps={countryApps}
             onGenerateQRCode={handleGenerateQRCode}
           />
         )}
